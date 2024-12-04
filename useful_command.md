@@ -1,3 +1,4 @@
+# compute the scattering intensity (I(q)) from a molecular dynamics simulation
 
 ## gmx_mpi saxs -s npt3.tpr -f npt3.trr -b 0 -e 50000 -dt 2500
 
