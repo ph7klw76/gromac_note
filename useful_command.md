@@ -1,6 +1,6 @@
-# compute the scattering intensity (I(q)) from a molecular dynamics simulation
+## 1. compute the scattering intensity (I(q)) from a molecular dynamics simulation
 
-## gmx_mpi saxs -s npt3.tpr -f npt3.trr -b 0 -e 50000 -dt 2500
+### gmx_mpi saxs -s npt3.tpr -f npt3.trr -b 0 -e 50000 -dt 2500
 
 This command calculates the SAXS profile of the system described in npt3.tpr over the trajectory in npt3.trr. 
 The analysis begins at 0 ps, ends at 50000 ps, and considers frames sampled every 2500 ps. This provides an averaged SAXS profile that balances computational efficiency and resolution.
