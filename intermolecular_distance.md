@@ -385,8 +385,12 @@ In order to do that you need to create an index file using and select the desire
 where 2 is the residue groupn ri is the index of the residue
 ```plaintext
 echo -e "2\nri 94 |ri 949\nq" |gmx_mpi make_ndx -f npt3.gro -o index.ndx
-```
 
+```
+the you can extract out the molecular pair by using teh command
+```plaintext
+echo -e " r_94_r_949\nq" | gmx_mpi trjconv -f npt3.gro -s npt3.gro -n index.ndx -o r_94_r_949.pdb
+```
 ## Conclusion
 This Python-based framework showcases the synergy of computational geometry and data visualization in molecular simulations.
 By leveraging KD-tree for efficient spatial queries and KDE for insightful visualizations, the script provides a robust tool for analyzing atomic-scale spatial relationships in molecular systems.
