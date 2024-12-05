@@ -410,7 +410,7 @@ done
 echo "q" >> commands.txt
 ```
 
-It is not advisable to extract all the molecules, so a 120 lines are extracted randomly.
+It is not advisable to extract all the molecules, so the first 120 lines are extracted.
 
 ```plaintext
 # Input file and necessary GROMACS files
@@ -418,9 +418,9 @@ input_file="nearest_neighbor_centroids.txt"
 gro_file="output_whole.gro"
 index_file="index.ndx"
 
-# Randomly select 120 lines from the input file without replacement
-temp_file="random_120_lines.txt"
-shuf -n 120 "$input_file" > "$temp_file"
+# Extract the first 120 lines from the input file
+temp_file="first_120_lines.txt"
+head -n 120 "$input_file" > "$temp_file"
 
 # Loop through each selected line of the temporary file
 while read -r line; do
@@ -439,7 +439,7 @@ while read -r line; do
 done < "$temp_file"
 
 # Clean up temporary file
-# rm "$temp_file"
+rm "$temp_file"
 ```
 
 
