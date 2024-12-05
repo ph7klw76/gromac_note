@@ -660,13 +660,13 @@ head -n 120 "$input_list" | while read -r line; do
 done
 ```
 
-to create gaussian file to coupling the electronic coupling run the script code below for pair
+to create gaussian file to coupling the electronic coupling run the script code below
 
 ```plaintext
 # Input text file containing the file pairs
 input_list="nearest_neighbor_centroids.txt"
 
-# Output directory for the .gjf files
+# Output directory for the generated .gjf files
 output_dir="output_gjf_files"
 mkdir -p "$output_dir"  # Create the directory if it doesn't exist
 
@@ -704,8 +704,10 @@ head -n 120 "$input_list" | while read -r line; do
     file1="${xx}.pdb"
     file2="${xxx}.pdb"
     
-    # Define the output .gjf file name
-    output_file="${output_dir}/${xx}_${xxx}.gjf"
+    # Define the output .gjf files
+    output_pair_file="${output_dir}/${xx}_${xxx}.gjf"
+    output_file1="${output_dir}/${xx}.gjf"
+    output_file2="${output_dir}/${xxx}.gjf"
 
     # Check if input files exist
     if [[ ! -f "$file1" || ! -f "$file2" ]]; then
@@ -716,16 +718,15 @@ head -n 120 "$input_list" | while read -r line; do
     # Extract data and unique letters
     data1=$(process_pdb "$file1")
     data2=$(process_pdb "$file2")
-    unique_letters1=$(extract_unique_letters "$file1")
-    unique_letters2=$(extract_unique_letters "$file2")
-
+    unique_letters1=$(extract_unique_letters "$file1" | tr '\n' ' ')
+    unique_letters2=$(extract_unique_letters "$file2" | tr '\n' ' ')
     # Combine unique letters from both files
     B=$(echo -e "$unique_letters1\n$unique_letters2" | sort -u | tr '\n' ' ')
 
-    # Write to the .gjf file
+    # Write the pair .gjf file
     {
-        echo "%mem=32GB"
-        echo "%nprocshared=16"
+        echo "%mem=16GB"
+        echo "%nprocshared=8"
         echo "# gen guess=huckel nosymm pop=nboread"
         echo "# scf=(direct,nosymm)"
         echo ""
@@ -735,18 +736,55 @@ head -n 120 "$input_list" | while read -r line; do
         echo "$data1"
         echo "$data2"
         echo ""
-        echo " $B 0"
-        echo "   Def2SVP"
-        echo "  ****"
+        echo "$B 0"
+        echo "Def2SVP"
+        echo "****"
         echo ""
         echo "\$NBO SAO=w53 FAO=W54 \$END"
-    } > "$output_file"
+    } > "$output_pair_file"
+
+    # Write the .gjf file for file1
+    {
+        echo "%mem=32GB"
+        echo "%nprocshared=16"
+        echo "# gen nosymm punch(MO)"
+        echo "# scf=(direct,nosymm)"
+        echo ""
+        echo "carbazol"
+        echo ""
+        echo "0 1"
+        echo "$data1"
+        echo ""
+        echo " $unique_letters1 0"
+        echo " Def2SVP"
+        echo " ****"
+    } > "$output_file1"
+
+    # Write the .gjf file for file2
+    {
+        echo "%mem=32GB"
+        echo "%nprocshared=16"
+        echo "# gen nosymm punch(MO)"
+        echo "# scf=(direct,nosymm)"
+        echo ""
+        echo "carbazol"
+        echo ""
+        echo "0 1"
+        echo "$data2"
+        echo ""
+        echo " $unique_letters2 0"
+        echo " Def2SVP"
+        echo " ****"
+    } > "$output_file2"
 
     # Log to the summary file
-    echo "Processed: $file1 and $file2 -> $output_file (Unique letters: $B)" >> "$summary_file"
+    echo "Processed: $file1 and $file2" >> "$summary_file"
+    echo " - Pair .gjf file: $output_pair_file" >> "$summary_file"
+    echo " - Single .gjf file for $file1: $output_file1" >> "$summary_file"
+    echo " - Single .gjf file for $file2: $output_file2" >> "$summary_file"
 
-    # Print confirmation for each file pair
-    echo "Processed: $file1 and $file2 -> $output_file"
+    # Print confirmation
+    echo "Processed: $file1 and $file2"
 done
 
 # Print completion message
