@@ -381,9 +381,10 @@ Iterates through the list of pairs.
 Writes each pair and their distance to a file with a precision of six decimal places.
 
 Often you want to extract the molecular pair from the gromac file.
-In order to do that you need to create an index file using command
+In order to do that you need to create an index file using and select the desired index of the residue following the command
+where 2 is the residue groupn ri is the index of the residue
 ```plaintext
-echo -e "0\nq" | gmx_mpi make_ndx -f npt3.gro -o index.ndx
+echo -e "2\nri 94 |ri 949\nq" |gmx_mpi make_ndx -f npt3.gro -o index.ndx
 ```
 
 ## Conclusion
