@@ -105,6 +105,7 @@ def plot_probability_density(distances, title):
 
 # Main execution
 file_path = 'npt3.gro'  # Path to the .gro file
+# User Defined Molecule positions
 specific_carbon_labels = ['C27', 'C14', 'C12', 'C2', 'C8', 'C5', 'C15', 'C18', 
                           'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62']
 ```
