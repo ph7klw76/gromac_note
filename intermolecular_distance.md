@@ -380,6 +380,12 @@ How It Works:
 Iterates through the list of pairs.
 Writes each pair and their distance to a file with a precision of six decimal places.
 
+Often you want to extract the molecular pair from the gromac file.
+In order to do that you need to create an index file using command
+```plaintext
+echo -e "0\nq" | gmx_mpi make_ndx -f npt3.gro -o index.ndx
+```
+
 ## Conclusion
 This Python-based framework showcases the synergy of computational geometry and data visualization in molecular simulations.
 By leveraging KD-tree for efficient spatial queries and KDE for insightful visualizations, the script provides a robust tool for analyzing atomic-scale spatial relationships in molecular systems.
