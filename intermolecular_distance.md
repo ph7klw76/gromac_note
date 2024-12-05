@@ -391,6 +391,167 @@ the you can extract out the molecular pair by using teh command
 ```plaintext
 echo -e " r_94_r_949\nq" | gmx_mpi trjconv -f npt3.gro -s npt3.gro -n index.ndx -o r_94_r_949.pdb
 ```
+
+However sometimes we are interested in centroid of the molecules, then the program is modified as below
+
+```python
+import numpy as np
+from scipy.spatial import cKDTree
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Function to read and parse a .gro file containing molecular trajectory data
+def read_gro_file_with_masses(file_path):
+    """
+    Reads a .gro file and extracts molecular and atomic information.
+    
+    Args:
+        file_path (str): Path to the .gro file.
+
+    Returns:
+        dict: A dictionary where keys are molecule numbers, and values are lists of tuples
+              containing atomic coordinates (x, y, z) and atom type.
+    """
+    with open(file_path, 'r') as file:
+        lines = file.readlines()[2:]  # Skip the first two header lines
+
+    molecules = {}
+    for line in lines:
+        if not line.strip():
+            continue  # Skip empty lines
+        try:
+            molecule_number = int(line[0:5])  # Extract molecule number from the first 5 characters
+            atom_type = line[10:15].strip()  # Extract atom type
+            x, y, z = map(float, [line[20:28].strip(), line[28:36].strip(), line[36:44].strip()])  # Extract x, y, z
+            if molecule_number in molecules:
+                molecules[molecule_number].append((x, y, z, atom_type))
+            else:
+                molecules[molecule_number] = [(x, y, z, atom_type)]
+        except ValueError:
+            continue  # Skip lines that cannot be parsed
+    return molecules
+
+# Function to filter specific carbon atoms based on labels
+def extract_specific_carbon_atoms(atoms, carbon_labels):
+    """
+    Filters atoms based on a list of specific carbon labels.
+    
+    Args:
+        atoms (list): List of atom tuples (x, y, z, atom_type).
+        carbon_labels (list): List of carbon labels to filter (e.g., ['C27', 'C14']).
+
+    Returns:
+        list: Filtered list of atom tuples matching the carbon labels.
+    """
+    return [atom for atom in atoms if any(c_label in atom[3] for c_label in carbon_labels)]
+
+# Function to compute centroids of specific carbon atoms for each molecule
+def compute_molecule_centroids(molecules, carbon_labels):
+    """
+    Compute the centroid (average position) of specified carbon atoms for each molecule.
+    
+    Args:
+        molecules (dict): Dictionary of molecules with atomic data.
+        carbon_labels (list): List of specific carbon labels to include in the centroid calculation.
+
+    Returns:
+        dict: A dictionary where keys are molecule IDs, and values are centroid positions (x, y, z).
+    """
+    centroids = {}
+    for mol_id, atoms in molecules.items():
+        # Filter atoms to include only the specific carbon atoms
+        specific_atoms = extract_specific_carbon_atoms(atoms, carbon_labels)
+        if specific_atoms:
+            # Compute the centroid as the average of all positions
+            centroid = np.mean([atom[:3] for atom in specific_atoms], axis=0)
+            centroids[mol_id] = centroid
+    return centroids
+
+# Function to compute nearest-neighbor distances based on centroids
+def calculate_kd_tree_nearest_molecule_distances(centroids):
+    """
+    Computes unique nearest-neighbor distances between molecular centroids.
+    
+    Args:
+        centroids (dict): Dictionary of molecule IDs and their centroid positions.
+
+    Returns:
+        list: List of unique pairs (mol_id1, mol_id2, distance).
+    """
+    # Extract centroids into an array and track molecule IDs
+    mol_ids = np.array(list(centroids.keys()))
+    points = np.array(list(centroids.values()))
+
+    # Build KD-tree for centroid positions
+    tree = cKDTree(points)
+    distances, indexes = tree.query(points, k=2)  # Nearest and second nearest neighbors
+
+    nearest_pairs = set()  # Use a set to avoid duplicate pairs
+    for dist, idx, mol_id in zip(distances[:, 1], indexes[:, 1], mol_ids):
+        neighbor_mol_id = mol_ids[idx]
+        if mol_id != neighbor_mol_id:  # Exclude self-pairs
+            # Add pair as a sorted tuple to ensure uniqueness
+            pair = tuple(sorted((mol_id, neighbor_mol_id)))
+            nearest_pairs.add((pair[0], pair[1], dist))
+    return list(nearest_pairs)
+
+# Function to save nearest-neighbor pairs to a file
+def save_unique_nearest_neighbor_pairs(file_name, pairs):
+    """
+    Save unique molecular pairs with their distances to a file.
+    
+    Args:
+        file_name (str): Path to save the file.
+        pairs (list): List of unique pairs with distances.
+    """
+    with open(file_name, 'w') as file:
+        for pair in pairs:
+            file.write(f"{pair[0]} {pair[1]} {pair[2]:.6f}\n")
+
+# Function to plot the probability density distribution of distances
+def plot_probability_density(distances, title):
+    """
+    Plots the probability density distribution of distances using a KDE (Kernel Density Estimate).
+    
+    Args:
+        distances (list): List of distances to visualize.
+        title (str): Title of the plot.
+    """
+    plt.figure(figsize=(10, 6))  # Set figure size
+    sns.kdeplot(distances, fill=True)  # Plot KDE with filled area for better visualization
+    plt.title(title)  # Add title
+    plt.xlabel('Distance (nm)')  # Label x-axis
+    plt.ylabel('Probability Density')  # Label y-axis
+    plt.show()  # Display the plot
+
+# Main program
+if __name__ == "__main__":
+    file_path = 'npt3.gro'  # Path to the .gro file
+    specific_carbon_labels = ['C27', 'C14', 'C12', 'C2', 'C8', 'C5', 'C15', 'C18',
+                              'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62']
+
+    try:
+        # Step 1: Read and parse the molecular data
+        molecules = read_gro_file_with_masses(file_path)
+
+        # Step 2: Compute centroids for each molecule
+        centroids = compute_molecule_centroids(molecules, specific_carbon_labels)
+
+        # Step 3: Calculate unique nearest-neighbor molecular distances
+        unique_nearest_pairs = calculate_kd_tree_nearest_molecule_distances(centroids)
+
+        # Step 4: Save unique nearest-neighbor pairs to a file
+        output_file_unique = 'nearest_neighbor_centroids.txt'
+        save_unique_nearest_neighbor_pairs(output_file_unique, unique_nearest_pairs)
+        print(f"Nearest neighbor pairs saved to {output_file_unique}")
+
+        # Step 5: Extract distances and plot probability density
+        distances = [pair[2] for pair in unique_nearest_pairs]
+        plot_probability_density(distances, 'Probability Density of Nearest Neighbor Distances (Centroids)')
+    except FileNotFoundError:
+        print(f"Error: File '{file_path}' not found. Please ensure the file exists.")
+```
+
 ## Conclusion
 This Python-based framework showcases the synergy of computational geometry and data visualization in molecular simulations.
 By leveraging KD-tree for efficient spatial queries and KDE for insightful visualizations, the script provides a robust tool for analyzing atomic-scale spatial relationships in molecular systems.
