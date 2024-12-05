@@ -1,4 +1,4 @@
-# Analyzing Carbon Atom Spatial Relationships in Molecular Simulations Using KD-Tree and Python
+# Analyzing Carbon Atom Spatial Relationships in Molecular Simulations Using KD-Tree and to extract to calculate electronic coupling
 
 ```python
 import numpy as np
