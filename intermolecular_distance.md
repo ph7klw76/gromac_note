@@ -725,8 +725,8 @@ head -n 120 "$input_list" | while read -r line; do
 
     # Write the pair .gjf file
     {
-        echo "%mem=16GB"
-        echo "%nprocshared=8"
+        echo "%mem=32GB"
+        echo "%nprocshared=16"
         echo "# gen guess=huckel nosymm pop=nboread"
         echo "# scf=(direct,nosymm)"
         echo ""
