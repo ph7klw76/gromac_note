@@ -604,6 +604,8 @@ if __name__ == "__main__":
         print(f"Error: File '{file_path}' not found. Please ensure the file exists.")
 ```
 
+To create .xyz file for viewing
+
 ```plaintext
 # Input text file containing the file pairs
 input_list="nearest_neighbor_centroids.txt"
