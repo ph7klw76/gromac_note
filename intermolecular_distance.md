@@ -392,13 +392,26 @@ Before able to extract out the pair of molecules it is important to remove bound
 
 ```plaintext
 echo -e "0\nq" | gmx_mpi trjconv -f npt3.gro -s npt3.tpr -pbc mol -o output_whole.gro
-```plaintext
+```
 
 the you can extract out the molecular pair by using teh command
 
 ```plaintext
 echo -e " r_94_r_949\nq" | gmx_mpi trjconv -f output_whole.gro -s output_whole.gro -n index.ndx -o r_94_r_949.pdb
 ```
+However sometimes you want to create all index for each molecules for ease of extracting molecules later
+```plaintext
+# File to store input for make_ndx
+echo "2" > commands.txt
+for i in $(seq 1 1001); do  # Replace N with the total number of residues
+    echo "ri $i" >> commands.txt
+done
+echo "q" >> commands.txt
+```plaintext
+
+# Run gmx_mpi make_ndx
+gmx_mpi make_ndx -f npt3.gro -o index.ndx < commands.txt
+
 
 However sometimes we are interested in centroid of the molecules, then the program is modified as below
 
