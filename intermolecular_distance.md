@@ -387,9 +387,17 @@ where 2 is the residue groupn ri is the index of the residue
 echo -e "2\nri 94 |ri 949\nq" |gmx_mpi make_ndx -f npt3.gro -o index.ndx
 
 ```
-the you can extract out the molecular pair by using teh command
+
+Before able to extract out the pair of molecules it is important to remove boundary condition and rematch the splitted molecule. To run this
+
 ```plaintext
-echo -e " r_94_r_949\nq" | gmx_mpi trjconv -f npt3.gro -s npt3.gro -n index.ndx -o r_94_r_949.pdb
+echo -e "0\nq" | gmx_mpi trjconv -f npt3.gro -s npt3.tpr -pbc mol -o output_whole.gro
+```plaintext
+
+the you can extract out the molecular pair by using teh command
+
+```plaintext
+echo -e " r_94_r_949\nq" | gmx_mpi trjconv -f output_whole.gro -s output_whole.gro -n index.ndx -o r_94_r_949.pdb
 ```
 
 However sometimes we are interested in centroid of the molecules, then the program is modified as below
@@ -551,6 +559,7 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found. Please ensure the file exists.")
 ```
+
 
 ## Conclusion
 This Python-based framework showcases the synergy of computational geometry and data visualization in molecular simulations.
