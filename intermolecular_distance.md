@@ -410,8 +410,38 @@ done
 echo "q" >> commands.txt
 ```
 
-# Run gmx_mpi make_ndx
-gmx_mpi make_ndx -f npt3.gro -o index.ndx < commands.txt
+It is not advisable to extract all the molecules, so a 120 lines are extracted randomly.
+
+```plaintext
+# Input file and necessary GROMACS files
+input_file="nearest_neighbor_centroids.txt"
+gro_file="output_whole.gro"
+index_file="index.ndx"
+
+# Randomly select 120 lines from the input file without replacement
+temp_file="random_120_lines.txt"
+shuf -n 120 "$input_file" > "$temp_file"
+
+# Loop through each selected line of the temporary file
+while read -r line; do
+    # Extract the first and second column (residue numbers)
+    residue1=$(echo $line | awk '{print $1}')
+    residue2=$(echo $line | awk '{print $2}')
+
+    # Generate the output filename based on the residues
+    output_file1="${residue1}.pdb"
+    output_file2="${residue2}.pdb"
+
+    # Run the GROMACS command to select the residues and write the output
+    echo -e "r_${residue1}\nq" | gmx_mpi trjconv -f "$gro_file" -s "$gro_file" -n "$index_file" -o "$output_file1"
+    echo -e "r_${residue2}\nq" | gmx_mpi trjconv -f "$gro_file" -s "$gro_file" -n "$index_file" -o "$output_file2"
+
+done < "$temp_file"
+
+# Clean up temporary file
+# rm "$temp_file"
+```
+
 
 
 However sometimes we are interested in centroid of the molecules, then the program is modified as below
