@@ -235,6 +235,150 @@ If the input `.gro` file contains trajectory data for molecules with targeted ca
 - **Peaks**: Corresponding to preferred intermolecular distances.
 - **Tails**: Indicating occasional long-range separations.
 
+You can save the nearest pair by using the code below:
+```python
+import numpy as np
+from scipy.spatial import cKDTree
+
+# Function to read and parse a .gro file containing molecular trajectory data
+def read_gro_file_with_masses(file_path):
+    """
+    Reads a .gro file and extracts molecular and atomic information.
+    
+    Args:
+        file_path (str): Path to the .gro file.
+
+    Returns:
+        dict: A dictionary where keys are molecule numbers, and values are lists of tuples
+              containing atomic coordinates (x, y, z) and atom type.
+    """
+    with open(file_path, 'r') as file:
+        lines = file.readlines()[2:]  # Skip the first two header lines
+
+    molecules = {}
+    for line in lines:
+        if not line.strip():
+            continue  # Skip empty lines
+        try:
+            molecule_number = int(line[0:5])  # Extract molecule number from the first 5 characters
+            atom_type = line[10:15].strip()  # Extract atom type
+            x, y, z = map(float, [line[20:28].strip(), line[28:36].strip(), line[36:44].strip()])  # Extract x, y, z
+            if molecule_number in molecules:
+                molecules[molecule_number].append((x, y, z, atom_type))
+            else:
+                molecules[molecule_number] = [(x, y, z, atom_type)]
+        except ValueError:
+            continue  # Skip lines that cannot be parsed
+    return molecules
+
+# Function to filter specific carbon atoms based on labels
+def extract_specific_carbon_atoms(atoms, carbon_labels):
+    """
+    Filters atoms based on a list of specific carbon labels.
+    
+    Args:
+        atoms (list): List of atom tuples (x, y, z, atom_type).
+        carbon_labels (list): List of carbon labels to filter (e.g., ['C27', 'C14']).
+
+    Returns:
+        list: Filtered list of atom tuples matching the carbon labels.
+    """
+    return [atom for atom in atoms if any(c_label in atom[3] for c_label in carbon_labels)]
+
+# Function to calculate unique nearest-neighbor distances and pairs
+def calculate_kd_tree_nearest_specific_carbon_pairs_unique(molecules, carbon_labels):
+    """
+    Computes unique nearest-neighbor distances between specific carbon atoms across molecules.
+    
+    Ensures no duplicate pairs (e.g., (1, 2) and (2, 1)) are recorded.
+    """
+    carbon_atoms = {mol_id: extract_specific_carbon_atoms(atoms, carbon_labels) for mol_id, atoms in molecules.items()}
+    flat_list = [(mol_id, atom) for mol_id, atoms in carbon_atoms.items() for atom in atoms]
+    points = np.array([atom[1][:3] for atom in flat_list])
+    mol_ids = np.array([atom[0] for atom in flat_list])
+
+    tree = cKDTree(points)
+    distances, indexes = tree.query(points, k=2)
+
+    nearest_pairs = set()  # Use a set to ensure unique pairs
+    for dist, idx, mol_id, point in zip(distances[:, 1], indexes[:, 1], mol_ids, points):
+        neighbor_mol_id = mol_ids[idx]
+        if mol_id != neighbor_mol_id:  # Ensure the neighbor belongs to a different molecule
+            # Add tuple with sorted molecule IDs to avoid duplicates
+            pair = tuple(sorted((mol_id, neighbor_mol_id)))
+            nearest_pairs.add((pair[0], pair[1], dist))
+    return list(nearest_pairs)
+
+# Function to save nearest-neighbor pairs to a file
+def save_unique_nearest_neighbor_pairs(file_name, pairs):
+    """
+    Save unique molecular pairs with their distances to a file.
+    
+    Args:
+        file_name (str): Path to save the file.
+        pairs (list): List of unique pairs with distances.
+    """
+    with open(file_name, 'w') as file:
+        for pair in pairs:
+            file.write(f"{pair[0]} {pair[1]} {pair[2]:.6f}\n")
+
+# Main program
+if __name__ == "__main__":
+    file_path = 'npt3.gro'  # Path to the .gro file
+    specific_carbon_labels = ['C27', 'C14', 'C12', 'C2', 'C8', 'C5', 'C15', 'C18',
+                              'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62']
+
+    # Step 1: Read and parse the molecular data
+    try:
+        molecules = read_gro_file_with_masses(file_path)
+
+        # Step 2: Calculate unique nearest-neighbor molecular pairs for specific carbon atoms
+        unique_nearest_pairs = calculate_kd_tree_nearest_specific_carbon_pairs_unique(molecules, specific_carbon_labels)
+
+        # Step 3: Save the unique nearest pairs to a file
+        output_file_unique = 'nearest_neighbor_unique.txt'
+        save_unique_nearest_neighbor_pairs(output_file_unique, unique_nearest_pairs)
+        print(f"Nearest neighbor pairs saved to {output_file_unique}")
+    except FileNotFoundError:
+        print(f"Error: File '{file_path}' not found. Please ensure the file exists.")
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Function to plot the probability density distribution of distances
+def plot_probability_density(distances, title):
+    """
+    Plots the probability density distribution of distances using a KDE (Kernel Density Estimate).
+    
+    Args:
+        distances (list): List of distances to visualize.
+        title (str): Title of the plot.
+    """
+    plt.figure(figsize=(10, 6))  # Set figure size
+    sns.kdeplot(distances, fill=True)  # Plot KDE with filled area for better visualization
+    plt.title(title)  # Add title
+    plt.xlabel('Distance (nm)')  # Label x-axis
+    plt.ylabel('Probability Density')  # Label y-axis
+    plt.show()  # Display the plot
+
+# Extract distances from the unique pairs
+distances = [pair[2] for pair in unique_nearest_pairs]
+
+# Plot the probability density distribution
+plot_probability_density(distances, 'Probability Density of Nearest Neighbor Distances')
+```
+
+## Saving Nearest-Neighbor Pairs
+The save_unique_nearest_neighbor_pairs function saves the results to a file:
+
+Input: A list of pairs and a file path.
+Output: A .txt file where each line contains:
+Two molecule IDs.
+The distance between their nearest carbon atoms.
+How It Works:
+
+Iterates through the list of pairs.
+Writes each pair and their distance to a file with a precision of six decimal places.
 
 ## Conclusion
 This Python-based framework showcases the synergy of computational geometry and data visualization in molecular simulations.
