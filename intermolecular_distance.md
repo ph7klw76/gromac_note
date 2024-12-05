@@ -660,7 +660,7 @@ head -n 120 "$input_list" | while read -r line; do
 done
 ```
 
-to create gaussian file to coupling the electronic coupling run the script code below
+to create gaussian file to coupling the electronic coupling run the script code below for pair
 
 ```plaintext
 # Input text file containing the file pairs
