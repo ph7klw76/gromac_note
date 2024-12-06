@@ -757,9 +757,10 @@ head -n 120 "$input_list" | while read -r line; do
         echo "0 1"
         echo "$data1"
         echo ""
-        echo " $unique_letters1 0"
-        echo " Def2SVP"
-        echo " ****"
+        echo "$unique_letters1 0"
+        echo "Def2SVP"
+        echo "****"
+        echo ""
     } > "$output_file1"
 
     # Write the .gjf file for file2
@@ -774,9 +775,10 @@ head -n 120 "$input_list" | while read -r line; do
         echo "0 1"
         echo "$data2"
         echo ""
-        echo " $unique_letters2 0"
-        echo " Def2SVP"
-        echo " ****"
+        echo "$unique_letters2 0"
+        echo "Def2SVP"
+        echo "****"
+        echo ""
     } > "$output_file2"
 
     # Log to the summary file
