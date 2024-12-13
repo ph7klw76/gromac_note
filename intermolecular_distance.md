@@ -752,8 +752,8 @@ head -n 120 "$input_list" | while read -r line; do
 
     # Write the pair .gjf file
     {
-        echo "%mem=72GB"
         echo "%nprocshared=16"
+        echo "%mem=32GB"
         echo "# gen guess=huckel nosymm pop=nboread"
         echo "# scf=(direct,nosymm)"
         echo ""
@@ -772,8 +772,8 @@ head -n 120 "$input_list" | while read -r line; do
 
     # Write the .gjf file for file1
     {
-        echo "%mem=32GB"
         echo "%nprocshared=16"
+        echo "%mem=32GB"
         echo "# gen nosymm punch(MO)"
         echo "# scf=(direct,nosymm)"
         echo ""
@@ -790,8 +790,8 @@ head -n 120 "$input_list" | while read -r line; do
 
     # Write the .gjf file for file2
     {
-        echo "%mem=32GB"
         echo "%nprocshared=16"
+        echo "%mem=32GB"
         echo "# gen nosymm punch(MO)"
         echo "# scf=(direct,nosymm)"
         echo ""
@@ -818,6 +818,7 @@ done
 
 # Print completion message
 echo "Processing complete. Summary saved in $summary_file."
+
 ```
 
 After the file are created you can run the script below:
@@ -866,7 +867,7 @@ while IFS=' ' read -r FIRST SECOND _; do
 #SBATCH --output=job.out
 #SBATCH --error=job.err
 #SBATCH --nodes=1
-#SBATCH --mem=72G
+#SBATCH --mem=32G
 #SBATCH --ntasks=16
 #SBATCH --qos=long
 #SBATCH --time=2-23:59:59
