@@ -665,6 +665,29 @@ done
 to create gaussian file to coupling the electronic coupling run the script code below
 
 ```plaintext
+#!/bin/bash -l
+  
+#SBATCH --partition=cpu-epyc-genoa
+#SBATCH --job-name=extract
+#SBATCH --output=%x.out
+#SBATCH --error=%x.err
+#SBATCH --mem=4G
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=0-00:59:59
+
+ 
+# Load dependencies and libraries
+source /app/hpcx/2.17.1/hpcx-init.sh
+hpcx_load
+ 
+module load gromacs/2023.2
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+
+
+#!/bin/bash
+
 # Input text file containing the file pairs
 input_list="nearest_neighbor_centroids.txt"
 
@@ -707,9 +730,11 @@ head -n 120 "$input_list" | while read -r line; do
     file2="${xxx}.pdb"
     
     # Define the output .gjf files
-    output_pair_file="${output_dir}/${xx}_${xxx}.gjf"
-    output_file1="${output_dir}/${xx}.gjf"
-    output_file2="${output_dir}/${xxx}.gjf"
+    mkdir -p "$output_dir/${xx}_${xxx}"  # Create the directory if it doesn't exist
+
+    output_pair_file="${output_dir}/${xx}_${xxx}/${xx}_${xxx}.gjf"
+    output_file1="${output_dir}/${xx}_${xxx}/${xx}.gjf"
+    output_file2="${output_dir}/${xx}_${xxx}/${xxx}.gjf"
 
     # Check if input files exist
     if [[ ! -f "$file1" || ! -f "$file2" ]]; then
@@ -727,7 +752,7 @@ head -n 120 "$input_list" | while read -r line; do
 
     # Write the pair .gjf file
     {
-        echo "%mem=64GB"
+        echo "%mem=72GB"
         echo "%nprocshared=16"
         echo "# gen guess=huckel nosymm pop=nboread"
         echo "# scf=(direct,nosymm)"
