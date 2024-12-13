@@ -821,13 +821,13 @@ echo "Processing complete. Summary saved in $summary_file."
 ```
 
 After the file are created you can run the script below:
-The will auto submit the jobs and sirted the file into folder accrodingly
+The will auto submit the jobs from the folder accrodingly
 
 ```plaintext
 #!/bin/bash -l
 
 #SBATCH --partition=cpu-epyc-genoa
-#SBATCH --job-name=1_25
+#SBATCH --job-name=submit
 #SBATCH --output=%x.out
 #SBATCH --error=%x.err
 #SBATCH --nodes=1
@@ -857,8 +857,8 @@ while IFS=' ' read -r FIRST SECOND _; do
         mkdir -p "$DIR"
         sleep 1
 
-        # Create SLURM submission script
-        SUBMISSION_FILE="submit_gaussian.sh"
+        # Create SLURM submission script inside the directory
+        SUBMISSION_FILE="${DIR}/submit_gaussian.sh"
         cat > "$SUBMISSION_FILE" << EOF
 #!/bin/bash
 #SBATCH --partition=cpu-epyc-genoa
@@ -866,7 +866,7 @@ while IFS=' ' read -r FIRST SECOND _; do
 #SBATCH --output=job.out
 #SBATCH --error=job.err
 #SBATCH --nodes=1
-#SBATCH --mem=64G
+#SBATCH --mem=72G
 #SBATCH --ntasks=16
 #SBATCH --qos=long
 #SBATCH --time=2-23:59:59
@@ -875,27 +875,19 @@ while IFS=' ' read -r FIRST SECOND _; do
 module load gaussian/g09
 source \$g09profile
 
-g09 <${FIRST}.gjf>${FIRST}.log
-g09 <${SECOND}.gjf>${SECOND}.log
-g09 <${FIRST}_${SECOND}.gjf>${FIRST}_${SECOND}.log
-# Move the files after ${FIRST}_${SECOND}.log is completed
-sleep 1
-mv ${FIRST}.log ${SECOND}.log ${FIRST}_${SECOND}.log FILE.53 FILE.54 fort.7 "${DIR}/"
+g09 <${FIRST}.gjf> ${FIRST}.log
+g09 <${SECOND}.gjf> ${SECOND}.log
+g09 <${FIRST}_${SECOND}.gjf> ${FIRST}_${SECOND}.log
 EOF
 
         # Make the submission script executable
         chmod +x "$SUBMISSION_FILE"
 
-        # Submit the job
-        JOB_ID=$(sbatch "$SUBMISSION_FILE" | awk '{print $NF}')
-        echo "Submitted job with ID: $JOB_ID"
-
-        # Wait for the job to complete
-        while squeue --job "$JOB_ID" > /dev/null 2>&1; do
-            echo "Waiting for job $JOB_ID to complete..."
-            sleep 30
-        done
-        echo "Job $JOB_ID completed."
+        # Submit the job from within the directory
+        cd "$DIR"
+        JOB_ID=$(sbatch "submit_gaussian.sh" | awk '{print $NF}')
+        echo "Submitted job with ID: $JOB_ID from directory: $DIR"
+        cd ..
     fi
 
     # Stop processing if we exceed the range
@@ -903,6 +895,7 @@ EOF
         break
     fi
 done < "$INPUT_FILE"
+
 ```
 
 ## Conclusion
