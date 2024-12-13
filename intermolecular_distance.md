@@ -727,7 +727,7 @@ head -n 120 "$input_list" | while read -r line; do
 
     # Write the pair .gjf file
     {
-        echo "%mem=32GB"
+        echo "%mem=64GB"
         echo "%nprocshared=16"
         echo "# gen guess=huckel nosymm pop=nboread"
         echo "# scf=(direct,nosymm)"
@@ -793,6 +793,91 @@ done
 
 # Print completion message
 echo "Processing complete. Summary saved in $summary_file."
+```
+
+After the file are created you can run the script below:
+The will auto submit the jobs and sirted the file into folder accrodingly
+
+```plaintext
+#!/bin/bash -l
+
+#SBATCH --partition=cpu-epyc-genoa
+#SBATCH --job-name=1_25
+#SBATCH --output=%x.out
+#SBATCH --error=%x.err
+#SBATCH --nodes=1
+#SBATCH --mem=4G
+#SBATCH --ntasks=1
+#SBATCH --qos=long
+#SBATCH --time=2-23:59:59
+#SBATCH --hint=nomultithread
+
+# Input file
+INPUT_FILE="nearest_neighbor_centroids.txt"
+
+# Starting line (n) and number of lines to process (m)
+START_LINE=1  # Replace with the desired starting line
+NUM_LINES=100  # Replace with the number of lines to process
+
+# Read each line in the file
+LINE_COUNT=0
+while IFS=' ' read -r FIRST SECOND _; do
+    # Increment the line counter
+    LINE_COUNT=$((LINE_COUNT + 1))
+    
+    # Process only lines from START_LINE to START_LINE + NUM_LINES - 1
+    if [ "$LINE_COUNT" -ge "$START_LINE" ] && [ "$LINE_COUNT" -lt $((START_LINE + NUM_LINES)) ]; then
+        # Construct the Gaussian commands
+        DIR="${FIRST}_${SECOND}"
+        mkdir -p "$DIR"
+        sleep 1
+
+        # Create SLURM submission script
+        SUBMISSION_FILE="submit_gaussian.sh"
+        cat > "$SUBMISSION_FILE" << EOF
+#!/bin/bash
+#SBATCH --partition=cpu-epyc-genoa
+#SBATCH --job-name=${FIRST}_${SECOND}
+#SBATCH --output=job.out
+#SBATCH --error=job.err
+#SBATCH --nodes=1
+#SBATCH --mem=64G
+#SBATCH --ntasks=16
+#SBATCH --qos=long
+#SBATCH --time=2-23:59:59
+#SBATCH --hint=nomultithread
+
+module load gaussian/g09
+source \$g09profile
+
+g09 <${FIRST}.gjf>${FIRST}.log
+g09 <${SECOND}.gjf>${SECOND}.log
+g09 <${FIRST}_${SECOND}.gjf>${FIRST}_${SECOND}.log
+# Move the files after ${FIRST}_${SECOND}.log is completed
+sleep 1
+mv ${FIRST}.log ${SECOND}.log ${FIRST}_${SECOND}.log FILE.53 FILE.54 fort.7 "${DIR}/"
+EOF
+
+        # Make the submission script executable
+        chmod +x "$SUBMISSION_FILE"
+
+        # Submit the job
+        JOB_ID=$(sbatch "$SUBMISSION_FILE" | awk '{print $NF}')
+        echo "Submitted job with ID: $JOB_ID"
+
+        # Wait for the job to complete
+        while squeue --job "$JOB_ID" > /dev/null 2>&1; do
+            echo "Waiting for job $JOB_ID to complete..."
+            sleep 30
+        done
+        echo "Job $JOB_ID completed."
+    fi
+
+    # Stop processing if we exceed the range
+    if [ "$LINE_COUNT" -ge $((START_LINE + NUM_LINES)) ]; then
+        break
+    fi
+done < "$INPUT_FILE"
 ```
 
 ## Conclusion
