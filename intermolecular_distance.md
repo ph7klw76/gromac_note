@@ -777,7 +777,8 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found. Please ensure the file exists.")
 ```
-
+run https://github.com/ph7klw76/gromac_note/blob/main/run11.sh
+then run below
 To create .xyz file for viewing
 
 ```plaintext
