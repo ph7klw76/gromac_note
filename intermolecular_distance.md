@@ -777,8 +777,8 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found. Please ensure the file exists.")
 ```
-run https://github.com/ph7klw76/gromac_note/blob/main/run11.sh
-then run below
+
+
 To create .xyz file for viewing
 
 ```plaintext
@@ -836,6 +836,9 @@ head -n 120 "$input_list" | while read -r line; do
     echo "Processed: $file1 and $file2 -> $output_file"
 done
 ```
+or run
+run https://github.com/ph7klw76/gromac_note/blob/main/run11.sh
+to create all above 
 
 to create gaussian file to coupling the electronic coupling run the script code below
 
