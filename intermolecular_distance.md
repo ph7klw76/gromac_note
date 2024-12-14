@@ -843,7 +843,7 @@ INPUT_FILE="nearest_neighbor_centroids.txt"
 
 # Starting line (n) and number of lines to process (m)
 START_LINE=1  # Replace with the desired starting line
-NUM_LINES=100  # Replace with the number of lines to process
+NUM_LINES=120  # Replace with the number of lines to process
 
 # Read each line in the file
 LINE_COUNT=0
