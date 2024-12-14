@@ -1,4 +1,4 @@
-# Automated Extraction of Molecular Dynamics Results to calculation of electronic coupling calculation. 
+# Automated Extraction of Molecular Dynamics Results to Calculation of electronic coupling. 
 
 ```python
 import numpy as np
