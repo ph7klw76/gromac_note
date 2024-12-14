@@ -912,8 +912,21 @@ nBasisFunctsA=676
 nBasisFunctsB=676  
 ```
 BasisFunctions1 represents the total number of basis functions used to calculate Molecule1, which can be obtained from fort.7 by identifying the number of coefficients in the orbital at 1 Alpha.
-For NumeroOrbital1, just write down the HOMO index . HOMO-1 will take into play when the energu between HOMO and HOMO-1 is less than 0.3eV
- 
+For orbitalsA, just write down the HOMO index . HOMO-1 will take into play when the energu between HOMO and HOMO-1 is less than 0.3eV
+Once the calculation completed you have a given pair will contain data below
+
+![image](https://github.com/user-attachments/assets/3e30bc38-0bbf-4225-84f1-247777017657)
+
+based on the code for single pair at https://github.com/ph7klw76/gaussian_note/blob/main/electronic_coupling.md 
+It can be extended to become below for automated calculation as below
+
+```python
+
+
+```
+
+
+
 ## Conclusion
 This Python-based framework showcases the synergy of computational geometry and data visualization in molecular simulations.
 By leveraging KD-tree for efficient spatial queries and KDE for insightful visualizations, the script provides a robust tool for analyzing atomic-scale spatial relationships in molecular systems.
