@@ -188,11 +188,23 @@ def calculate_exhaustive_nearest_distances(molecules, carbon_labels):
             for atom1 in atoms1:
                 for atom2 in atoms2:
                     dist = np.linalg.norm(np.array(atom1[:3]) - np.array(atom2[:3]))
-                    nearest_pairs.append((mol_id1, mol_id2, dist))
+                    if dist < 0.5:  # Only include distances less than 0.5
+                        nearest_pairs.append((mol_id1, mol_id2, dist))
 
     # Sort pairs by distance
     nearest_pairs.sort(key=lambda x: x[2])
-    return nearest_pairs
+
+    # Ensure each molecule appears only once in the final list with the shortest distance
+    final_pairs = []
+    seen_molecules = set()
+    for pair in nearest_pairs:
+        mol_id1, mol_id2, dist = pair
+        if mol_id1 not in seen_molecules and mol_id2 not in seen_molecules:
+            final_pairs.append(pair)
+            seen_molecules.add(mol_id1)
+            seen_molecules.add(mol_id2)
+
+    return final_pairs
 
 # Function to save nearest-neighbor pairs to a file
 def save_unique_nearest_neighbor_pairs(file_name, pairs):
@@ -254,7 +266,7 @@ if __name__ == "__main__":
         # Step 3: Save unique nearest-neighbor pairs to a file
         output_file_unique = 'nearest_neighbor_distances.txt'
         save_unique_nearest_neighbor_pairs(output_file_unique, unique_nearest_pairs)
-        print(f"Nearest neighbor pairs saved to {output_file_unique}")
+        print(f"Nearest neighbor pairs with distances < 0.5 saved to {output_file_unique}")
 
         # Step 4: Compute the average nearest-neighbor distance
         average_distance = compute_average_distance(unique_nearest_pairs)
@@ -266,7 +278,7 @@ if __name__ == "__main__":
 
         # Step 5: Plot the probability density of distances
         distances = [pair[2] for pair in unique_nearest_pairs]
-        plot_probability_density(distances, "Probability Density of Nearest-Neighbor Distances")
+        plot_probability_density(distances, "Probability Density of Nearest-Neighbor Distances (<0.5 nm)")
 
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found. Please ensure the file exists.")
