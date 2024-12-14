@@ -1,27 +1,36 @@
 
-step 1
+## step 1
 submit molecular structure at
 https://atb.uq.edu.au/
-step 2
+
+## step 2
 after calculation is completed 
 ![image](https://github.com/user-attachments/assets/0136960b-053c-4066-9b24-44349e430306)
-step 3
+
+## step 3
 send the optimized.pdb file into terachem to further optimized the structure
-step 4
+
+## step 4
 used optimised structure to update the resp file in the molecule.ito downloaed in step 2. The molecular structure from DFT can be updated into the optimized.pdb obtained in step 2
-step 5
+
+## step 5
 torsional dihedral angle can be further quantified using DFT and the potential extracted and can be quantified using this file and updated the molecule.itp file
-step 6
+
+## step 6
 gmx_mpi editconf -f molecule.pdb -o molecule.gro
-step 7
+
+## step 7
 make sure the index start as 1 in molecule.gro
-step 8
+
+## step 8
 determine how many molecule you want to add into for 10nm x10nm x10nm box. gmx_mpi insert-molecules -ci molecule.gro -nmol 25 -box 10 10 10 -o box_with_molecule.gro
-step 9
+
+## step 9
 then solvate the box with solvent.gro (you moight need to get the itp and pdb from atb website)
 gmx_mpi insert-molecules -f box_with_molecule.gro -ci solvent.gro -nmol 20000 -o combined_box.gro
 check the putput file and see how many solvents are inserted.
-step 10
+
+## step 10
 update your comobined topology for example combined_box.itp
 ```plaintext
 #include "gromos54a7_atb.ff/forcefield.itp"
@@ -65,7 +74,7 @@ rvdw            = 1.2      ; Short-range Van der Waals cut-off
 pbc             = xyz       ; Periodic Boundary Conditions in all 3 dimensions
 ```
 
-Step 11
+## Step 11
 then you can run minimized and low-grade npt in CPU
 
 using the command below
@@ -131,5 +140,5 @@ pbc                     = xyz       ; 3-D PBC
 gen_vel                 = yes       ; assign velocities from Maxwell distribution
 ```
 
-step 12
+## step 12
 
