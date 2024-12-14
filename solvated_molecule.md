@@ -5,7 +5,10 @@ https://atb.uq.edu.au/
 
 ## step 2
 after calculation is completed 
-![image](https://github.com/user-attachments/assets/0136960b-053c-4066-9b24-44349e430306)
+![image](https://github.com/user-attachments/assets/b9043ed8-3676-4351-8aa3-23c0ce3a96b1)
+![image](https://github.com/user-attachments/assets/80f63da2-b7d1-4afd-8fb6-9f33f22e878d)
+
+
 
 ## step 3
 send the optimized.pdb file into terachem to further optimized the structure
