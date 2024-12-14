@@ -856,6 +856,8 @@ while IFS=' ' read -r FIRST SECOND _; do
         # Construct the Gaussian commands
         DIR="${FIRST}_${SECOND}"
         mkdir -p "$DIR"
+        DIR2="${FIRST}_${SECOND}/${FIRST}"
+        mkdir -p "$DIR2"
         sleep 1
 
         # Create SLURM submission script inside the directory
@@ -876,7 +878,7 @@ while IFS=' ' read -r FIRST SECOND _; do
 module load gaussian/g09
 source \$g09profile
 
-g09 <${FIRST}.gjf> ${FIRST}.log
+g09 <${FIRST}.gjf> ${FIRST}/${FIRST}.log
 g09 <${SECOND}.gjf> ${SECOND}.log
 g09 <${FIRST}_${SECOND}.gjf> ${FIRST}_${SECOND}.log
 EOF
