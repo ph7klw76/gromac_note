@@ -906,10 +906,10 @@ in order to apply the python code at https://github.com/ph7klw76/gaussian_note/b
 we need to create an paramFile.txt
 
 ```plaintext
- NumeroOrbital1=	131 132
- NumeroOrbital2=	131 132
- BasisFunctions1=	676   
- BasisFunctions2=	676  
+orbitalsA=131 132
+orbitalsB=131 132
+nBasisFunctsA=676   
+nBasisFunctsB=676  
 ```
 BasisFunctions1 represents the total number of basis functions used to calculate Molecule1, which can be obtained from fort.7 by identifying the number of coefficients in the orbital at 1 Alpha.
 For NumeroOrbital1, just write down the HOMO index . HOMO-1 will take into play when the energu between HOMO and HOMO-1 is less than 0.3eV
