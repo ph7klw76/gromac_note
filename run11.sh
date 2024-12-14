@@ -62,7 +62,7 @@ rm "$temp_file"
 sleep 2
 
 # Input text file containing the file pairs
-input_list="nearest_neighbor_centroids.txt"
+input_list="nearest_neighbor_distances.txt"
 
 # Output directory for the combined .xyz files
 output_dir="output_xyz_files"
