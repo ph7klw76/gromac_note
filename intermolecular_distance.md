@@ -109,6 +109,168 @@ file_path = 'npt3.gro'  # Path to the .gro file
 specific_carbon_labels = ['C27', 'C14', 'C12', 'C2', 'C8', 'C5', 'C15', 'C18', 
                           'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62']
 ```
+## Exhaustive Method 
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from tqdm import tqdm
+
+# Function to read and parse a .gro file containing molecular trajectory data
+def read_gro_file_with_masses(file_path):
+    """
+    Reads a .gro file and extracts molecular and atomic information.
+    
+    Args:
+        file_path (str): Path to the .gro file.
+
+    Returns:
+        dict: A dictionary where keys are molecule numbers, and values are lists of tuples
+              containing atomic coordinates (x, y, z) and atom type.
+    """
+    with open(file_path, 'r') as file:
+        lines = file.readlines()[2:]  # Skip the first two header lines
+
+    molecules = {}
+    for line in lines:
+        if not line.strip():
+            continue  # Skip empty lines
+        try:
+            molecule_number = int(line[0:5])  # Extract molecule number from the first 5 characters
+            atom_type = line[10:15].strip()  # Extract atom type
+            x, y, z = map(float, [line[20:28].strip(), line[28:36].strip(), line[36:44].strip()])  # Extract x, y, z
+            if molecule_number in molecules:
+                molecules[molecule_number].append((x, y, z, atom_type))
+            else:
+                molecules[molecule_number] = [(x, y, z, atom_type)]
+        except ValueError:
+            continue  # Skip lines that cannot be parsed
+    return molecules
+
+# Function to filter specific carbon atoms based on labels
+def extract_specific_carbon_atoms(atoms, carbon_labels):
+    """
+    Filters atoms based on a list of specific carbon labels.
+    
+    Args:
+        atoms (list): List of atom tuples (x, y, z, atom_type).
+        carbon_labels (list): List of carbon labels to filter (e.g., ['C27', 'C14']).
+
+    Returns:
+        list: Filtered list of atom tuples matching the carbon labels.
+    """
+    return [atom for atom in atoms if any(c_label in atom[3] for c_label in carbon_labels)]
+
+# Function to compute unique nearest-neighbor distances between all specific atoms in different molecules
+def calculate_exhaustive_nearest_distances(molecules, carbon_labels):
+    """
+    Computes unique nearest-neighbor distances between specific atoms in different molecules.
+    
+    Args:
+        molecules (dict): Dictionary of molecules with atomic data.
+        carbon_labels (list): List of specific carbon labels to include in the calculation.
+
+    Returns:
+        list: List of unique pairs (mol_id1, mol_id2, distance).
+    """
+    nearest_pairs = []
+    molecule_ids = list(molecules.keys())
+
+    for i, mol_id1 in tqdm(enumerate(molecule_ids), total=len(molecule_ids), desc="Calculating distances"):
+        atoms1 = extract_specific_carbon_atoms(molecules[mol_id1], carbon_labels)
+        for j, mol_id2 in enumerate(molecule_ids):
+            if i >= j:
+                continue  # Avoid self-pairs and duplicate pairs
+            atoms2 = extract_specific_carbon_atoms(molecules[mol_id2], carbon_labels)
+            
+            # Compute distances between all pairs of specific atoms
+            for atom1 in atoms1:
+                for atom2 in atoms2:
+                    dist = np.linalg.norm(np.array(atom1[:3]) - np.array(atom2[:3]))
+                    nearest_pairs.append((mol_id1, mol_id2, dist))
+
+    # Sort pairs by distance
+    nearest_pairs.sort(key=lambda x: x[2])
+    return nearest_pairs
+
+# Function to save nearest-neighbor pairs to a file
+def save_unique_nearest_neighbor_pairs(file_name, pairs):
+    """
+    Save unique molecular pairs with their distances to a file.
+    
+    Args:
+        file_name (str): Path to save the file.
+        pairs (list): List of unique pairs with distances.
+    """
+    with open(file_name, 'w') as file:
+        for pair in pairs:
+            file.write(f"{pair[0]} {pair[1]} {pair[2]:.6f}\n")
+
+# Function to compute average nearest-neighbor distance
+def compute_average_distance(pairs):
+    """
+    Compute the average distance from the list of unique nearest-neighbor pairs.
+    
+    Args:
+        pairs (list): List of unique pairs with distances.
+
+    Returns:
+        float: The average distance.
+    """
+    distances = [pair[2] for pair in pairs]
+    if distances:
+        return np.mean(distances)
+    return None
+
+# Function to plot the probability density distribution of distances
+def plot_probability_density(distances, title):
+    """
+    Plots the probability density distribution of distances using a KDE (Kernel Density Estimate).
+    
+    Args:
+        distances (list): List of distances to visualize.
+        title (str): Title of the plot.
+    """
+    plt.figure(figsize=(10, 6))
+    sns.kdeplot(distances, fill=True)
+    plt.title(title)
+    plt.xlabel("Distance (nm)")
+    plt.ylabel("Probability Density")
+    plt.show()
+
+# Main program
+if __name__ == "__main__":
+    file_path = 'npt3.gro'  # Path to the .gro file
+    specific_carbon_labels = ['C60','C55','C53','C40','C38','C41','C46','C33','C28','C19','C24','C25','C3']
+
+    try:
+        # Step 1: Read and parse the molecular data
+        molecules = read_gro_file_with_masses(file_path)
+
+        # Step 2: Calculate unique nearest-neighbor distances between specific atoms in different molecules
+        unique_nearest_pairs = calculate_exhaustive_nearest_distances(molecules, specific_carbon_labels)
+
+        # Step 3: Save unique nearest-neighbor pairs to a file
+        output_file_unique = 'nearest_neighbor_distances.txt'
+        save_unique_nearest_neighbor_pairs(output_file_unique, unique_nearest_pairs)
+        print(f"Nearest neighbor pairs saved to {output_file_unique}")
+
+        # Step 4: Compute the average nearest-neighbor distance
+        average_distance = compute_average_distance(unique_nearest_pairs)
+
+        if average_distance is not None:
+            print(f"Average nearest-neighbor distance: {average_distance:.6f} nm")
+        else:
+            print("No valid distances found between molecular centroids.")
+
+        # Step 5: Plot the probability density of distances
+        distances = [pair[2] for pair in unique_nearest_pairs]
+        plot_probability_density(distances, "Probability Density of Nearest-Neighbor Distances")
+
+    except FileNotFoundError:
+        print(f"Error: File '{file_path}' not found. Please ensure the file exists.")
+```
 
 # Step 1: Read and parse the molecular data
 molecules = read_gro_file_with_masses(file_path)
