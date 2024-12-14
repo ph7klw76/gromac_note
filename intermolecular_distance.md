@@ -898,7 +898,18 @@ EOF
 done < "$INPUT_FILE"
 
 ```
+in order to apply the python code at https://github.com/ph7klw76/gaussian_note/blob/main/electronic_coupling.md
+we need to create an paramFile.txt
 
+```plaintext
+ BasisFunctions1=	676   
+ BasisFunctions2=	676   
+ NumeroOrbital1=	131 132
+ NumeroOrbital2=	131 132
+```
+BasisFunctions1 represents the total number of basis functions used to calculate Molecule1, which can be obtained from fort.7 by identifying the number of coefficients in the orbital at 1 Alpha.
+For NumeroOrbital1, just write down the HOMO index . HOMO-1 will take into play when the energu between HOMO and HOMO-1 is less than 0.3eV
+ 
 ## Conclusion
 This Python-based framework showcases the synergy of computational geometry and data visualization in molecular simulations.
 By leveraging KD-tree for efficient spatial queries and KDE for insightful visualizations, the script provides a robust tool for analyzing atomic-scale spatial relationships in molecular systems.
