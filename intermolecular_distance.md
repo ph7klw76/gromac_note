@@ -836,6 +836,87 @@ head -n 120 "$input_list" | while read -r line; do
     echo "Processed: $file1 and $file2 -> $output_file"
 done
 ```
+
+# You need to filter out those which has the good overall contact using the code below before submitting to Gaussian
+
+```phython
+import os
+import numpy as np
+
+def extract_coordinates(file_path, indices):
+    """
+    Extracts coordinates for specified atom indices from an XYZ file.
+
+    Args:
+        file_path (str): Path to the XYZ file.
+        indices (list): List of atom indices to extract (1-based indexing).
+
+    Returns:
+        list: A list of (x, y, z) coordinates as tuples of floats.
+    """
+    coordinates = []
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            for index in indices:
+                # Adjust for 0-based indexing in Python
+                line = lines[index + 1].strip().split()
+                x, y, z = map(float, line[1:4])
+                coordinates.append((x, y, z))
+    except Exception as e:
+        print(f"Error reading file {file_path}: {e}")
+    return coordinates
+
+def calculate_average_distance(coords1, coords2):
+    """
+    Calculates the average distance between two lists of coordinates.
+
+    Args:
+        coords1 (list): List of (x, y, z) tuples for the first set of points.
+        coords2 (list): List of (x, y, z) tuples for the second set of points.
+
+    Returns:
+        float: The average distance between the points in the two lists.
+    """
+    distances = []
+    for coord1 in coords1:
+        for coord2 in coords2:
+            distance = np.linalg.norm(np.array(coord1) - np.array(coord2))
+            distances.append(distance)
+    return np.mean(distances)
+
+if __name__ == "__main__":
+    # Indices for the first and second molecules
+    molecule1_indices = [2, 7, 12, 14, 16, 18, 23, 29, 34, 39, 44, 53, 58, 65, 70, 75, 77, 78, 83, 90, 92, 97]
+    molecule2_indices = [104, 109, 114, 116, 118, 120, 125, 131, 136, 141, 146, 155, 160, 167, 172, 177, 179, 180, 185, 192, 194, 199]
+
+    # Output file to store results
+    output_file = "average_distances.txt"
+
+    # Open the output file
+    with open(output_file, "w") as out_file:
+        out_file.write("Filename\tAverage Distance\n")
+
+        # Loop through all .xyz files in the current directory
+        for filename in os.listdir("."):
+            if filename.endswith(".xyz"):
+                try:
+                    # Extract coordinates for the specified indices
+                    molecule1_coords = extract_coordinates(filename, molecule1_indices)
+                    molecule2_coords = extract_coordinates(filename, molecule2_indices)
+
+                    # Calculate the average distance
+                    average_distance = calculate_average_distance(molecule1_coords, molecule2_coords)
+
+                    # Write the results to the output file
+                    out_file.write(f"{filename}\t{average_distance:.4f}\n")
+                    print(f"Processed {filename}: Average Distance = {average_distance:.4f}")
+                except Exception as e:
+                    print(f"Error processing file {filename}: {e}")
+
+    print(f"Results saved to {output_file}.")
+```
+
 or run
 run https://github.com/ph7klw76/gromac_note/blob/main/run11.sh
 to create all above 
