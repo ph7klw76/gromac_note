@@ -107,7 +107,7 @@ def plot_probability_density(distances, title):
 file_path = 'npt3.gro'  # Path to the .gro file
 # User Defined Molecule positions
 specific_carbon_labels = ['C27', 'C14', 'C12', 'C2', 'C8', 'C5', 'C15', 'C18', 
-                          'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62']
+                          'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62'] # BEWARE the GauView Number X to PDB numnber
 ```
 ## Exhaustive Method 
 
@@ -254,7 +254,7 @@ def plot_probability_density(distances, title):
 # Main program
 if __name__ == "__main__":
     file_path = 'npt3.gro'  # Path to the .gro file
-    specific_carbon_labels = ['C60','C55','C53','C40','C38','C41','C46','C33','C28','C19','C24','C25','C3']
+    specific_carbon_labels = ['C60','C55','C53','C40','C38','C41','C46','C33','C28','C19','C24','C25','C3'] # BEWARE the GauView Number X to PDB numnber
 
     try:
         # Step 1: Read and parse the molecular data
@@ -500,7 +500,7 @@ def save_unique_nearest_neighbor_pairs(file_name, pairs):
 if __name__ == "__main__":
     file_path = 'npt3.gro'  # Path to the .gro file
     specific_carbon_labels = ['C27', 'C14', 'C12', 'C2', 'C8', 'C5', 'C15', 'C18',
-                              'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62']
+                              'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62'] # BEWARE the GauView Number X to PDB numnber
 
     # Step 1: Read and parse the molecular data
     try:
@@ -754,7 +754,7 @@ def plot_probability_density(distances, title):
 if __name__ == "__main__":
     file_path = 'npt3.gro'  # Path to the .gro file
     specific_carbon_labels = ['C27', 'C14', 'C12', 'C2', 'C8', 'C5', 'C15', 'C18',
-                              'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62']
+                              'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62'] # BEWARE the GauView Number X to PDB numnber
 
     try:
         # Step 1: Read and parse the molecular data
