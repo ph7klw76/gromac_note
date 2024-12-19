@@ -916,7 +916,7 @@ if __name__ == "__main__":
 
     print(f"Results saved to {output_file}.")
 ```
-
+# you need to match the filtered molecular pair with the nearest_neighbor_distances.txt and updated that distance
 or run
 run https://github.com/ph7klw76/gromac_note/blob/main/run11.sh
 to create all above 
@@ -947,7 +947,9 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 
 #!/bin/bash
 
-# Input text file containing the file pairs
+# Input text file containing the file pairs 
+
+
 input_list="nearest_neighbor_centroids.txt"
 
 # Output directory for the generated .gjf files
