@@ -109,7 +109,7 @@ file_path = 'npt3.gro'  # Path to the .gro file
 specific_carbon_labels = ['C27', 'C14', 'C12', 'C2', 'C8', 'C5', 'C15', 'C18', 
                           'C22', 'C29', 'C32', 'C35', 'C40', 'C56', 'C44', 'C53', 'C58', 'C62'] # BEWARE the GauView Number X to PDB numnber
 ```
-## Exhaustive Method 
+## Exhaustive Method [ONLY GET THE NEAREST CONTACT OF ONE MOLECULE TO ANOTHER]
 
 ```python
 import numpy as np
