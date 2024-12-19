@@ -920,20 +920,20 @@ if __name__ == "__main__":
 or run
 
 ```python
+import pandas as pd
 # Loading the contents of both files into DataFrames
 file_a_path = 'a.txt'
 file_b_path = 'b.txt'
 
 # Reading files into DataFrames
-df_a = pd.read_csv(file_a_path, sep="\t", header=None, names=["Column1", "Column2"])
-df_b = pd.read_csv(file_b_path, sep="\t", header=None, names=["Column1", "Column2", "Column3"])
+df_a = pd.read_csv(file_a_path, sep="\t", header=None, names=["Col1", "Col2", "Col3"])
+df_b = pd.read_csv(file_b_path, sep="\t", header=None, names=["Col1", "Col2", "Col3"])
 
-# Filtering rows from B where the first two columns match rows in A
-matching_rows = df_b[df_b[["Column1", "Column2"]].isin(df_a[["Column1", "Column2"]].to_dict(orient='list')).all(axis=1)]
+# Find matching rows based on Col1 and Col2
+matching_rows = pd.merge(df_a, df_b, on=["Col1", "Col2"])
 
-# Saving the matching rows to a new file
-output_file_path = 'matching_rows.txt'
-matching_rows.to_csv(output_file_path, sep="\t", index=False, header=False)
+# Save the matching rows to a new file
+matching_rows.to_csv('matching_rows.txt', sep="\t", index=False, header=False)
 ```
 
 
