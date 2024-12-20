@@ -50,9 +50,10 @@ def save_torsional_data(filename, torsional_data):
 if __name__ == "__main__":
     # Define the atom indices for torsional angle calculations
     atom_indices_list = [[26,14,15,24],[91,79,80,89]]
+    indices_string = "_".join("_".join(map(str, indices)) for indices in atom_indices_list)
     atom_indices_list = [[value - 1 for value in indices] for indices in atom_indices_list]
 
-    indices_string = "_".join("_".join(map(str, indices)) for indices in atom_indices_list)
+
     # Get all .xyz files in the current directory
     xyz_files = [f for f in os.listdir() if f.endswith(".xyz")]
 
